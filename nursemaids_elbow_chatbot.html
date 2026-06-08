@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APRN History Lab — Pediatric Arm Pain</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root {
+    --navy: #0D2C3E;
+    --navy-light: #1A3F58;
+    --teal: #1D9E75;
+    --teal-light: #E1F5EE;
+    --teal-mid: #9FE1CB;
+    --paper: #F6F4EF;
+    --paper-dark: #ECE9E1;
+    --border: #CDD5D8;
+    --text: #1A1A1A;
+    --muted: #5C6B76;
+    --white: #FFFFFF;
+    --mom-bg: #FFFFFF;
+    --mom-border: #CDD5D8;
+    --child-bg: #FFF8F0;
+    --child-border: #F5C4B3;
+    --system-bg: #E1F5EE;
+    --system-border: #9FE1CB;
+    --user-bg: #0D2C3E;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: var(--paper);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* TOP BAR */
+  .topbar {
+    background: var(--navy);
+    color: white;
+    padding: 0 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    flex-shrink: 0;
+    border-bottom: 2px solid var(--teal);
+  }
+  .topbar-left { display: flex; align-items: center; gap: 12px; }
+  .topbar-badge {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: rgba(29,158,117,0.25);
+    color: var(--teal-mid);
+    border: 1px solid rgba(29,158,117,0.4);
+    border-radius: 4px;
+    padding: 3px 8px;
+  }
+  .topbar-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: white;
+  }
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .btn-end {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    background: transparent;
+    color: rgba(255,255,255,0.6);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 6px;
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-end:hover { background: rgba(255,255,255,0.08); color: white; border-color: rgba(255,255,255,0.4); }
+
+  /* SCENE BANNER */
+  .scene-banner {
+    background: var(--navy-light);
+    color: rgba(255,255,255,0.85);
+    font-size: 13px;
+    line-height: 1.6;
+    padding: 10px 1.5rem;
+    flex-shrink: 0;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .scene-icon {
+    width: 20px; height: 20px;
+    background: var(--teal);
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+  }
+  .scene-text { flex: 1; }
+  .scene-text strong { color: white; }
+
+  /* LEGEND */
+  .legend {
+    background: var(--paper-dark);
+    border-bottom: 1px solid var(--border);
+    padding: 6px 1.5rem;
+    display: flex;
+    gap: 1.25rem;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    border: 1.5px solid;
+    flex-shrink: 0;
+  }
+  .legend-dot.mom { background: var(--mom-bg); border-color: var(--mom-border); }
+  .legend-dot.child { background: var(--child-bg); border-color: var(--child-border); }
+  .legend-dot.system { background: var(--system-bg); border-color: var(--system-border); }
+
+  /* LAYOUT */
+  .layout {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 230px;
+    flex-shrink: 0;
+    background: var(--white);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 1rem;
+  }
+  .sidebar-section { margin-bottom: 1.25rem; }
+  .sidebar-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+  .sidebar-card {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  .sidebar-card strong { font-weight: 500; color: var(--navy); }
+  .sidebar-card .row { display: flex; justify-content: space-between; margin-bottom: 3px; }
+  .sidebar-card .row:last-child { margin-bottom: 0; }
+  .sidebar-card .label { color: var(--muted); }
+  .sidebar-card .val { font-weight: 500; }
+
+  .checklist { list-style: none; }
+  .checklist li {
+    font-size: 12px;
+    color: var(--muted);
+    padding: 4px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    border-bottom: 1px solid var(--paper-dark);
+    line-height: 1.4;
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li .check {
+    width: 14px; height: 14px;
+    border-radius: 3px;
+    border: 1.5px solid var(--border);
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px;
+    background: white;
+    transition: all 0.2s;
+  }
+  .checklist li.done .check {
+    background: var(--teal);
+    border-color: var(--teal);
+    color: white;
+  }
+  .checklist li.done { color: var(--text); }
+
+  .tip-box {
+    background: var(--teal-light);
+    border: 1px solid var(--teal-mid);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 11.5px;
+    line-height: 1.6;
+    color: #085041;
+  }
+  .tip-box p { margin-bottom: 5px; }
+  .tip-box p:last-child { margin-bottom: 0; }
+
+  /* CHAT AREA */
+  .chat-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scroll-behavior: smooth;
+  }
+
+  /* MESSAGES */
+  .msg { display: flex; flex-direction: column; max-width: 78%; }
+  .msg.user { align-self: flex-end; align-items: flex-end; }
+  .msg.patient { align-self: flex-start; align-items: flex-start; }
+  .msg.system { align-self: center; align-items: center; max-width: 90%; }
+
+  .msg-label {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+    padding: 0 4px;
+  }
+  .msg.user .msg-label { color: var(--muted); }
+
+  .msg-bubble {
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.65;
+    border: 1px solid transparent;
+  }
+  .msg.user .msg-bubble {
+    background: var(--user-bg);
+    color: white;
+    border-radius: 12px 12px 2px 12px;
+  }
+  .msg.patient.mom .msg-bubble {
+    background: var(--mom-bg);
+    border-color: var(--mom-border);
+    border-radius: 2px 12px 12px 12px;
+    color: var(--text);
+  }
+  .msg.patient.child .msg-bubble {
+    background: var(--child-bg);
+    border-color: var(--child-border);
+    border-radius: 2px 12px 12px 12px;
+    color: var(--text);
+  }
+  .msg.system .msg-bubble {
+    background: var(--system-bg);
+    border-color: var(--system-border);
+    color: #085041;
+    font-size: 13px;
+    text-align: center;
+    border-radius: 8px;
+  }
+
+  /* TYPING INDICATOR */
+  .typing-indicator {
+    align-self: flex-start;
+    display: none;
+    padding: 8px 14px;
+    background: var(--mom-bg);
+    border: 1px solid var(--mom-border);
+    border-radius: 2px 12px 12px 12px;
+  }
+  .typing-indicator.show { display: flex; gap: 4px; align-items: center; }
+  .typing-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--muted);
+    animation: bounce 1.2s infinite;
+  }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-5px); opacity: 1; }
+  }
+
+  /* INPUT AREA */
+  .input-area {
+    border-top: 1px solid var(--border);
+    background: var(--white);
+    padding: 12px 1.5rem;
+    flex-shrink: 0;
+  }
+  .input-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+  }
+  .input-wrap { flex: 1; position: relative; }
+  textarea#user-input {
+    width: 100%;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text);
+    background: var(--paper);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    resize: none;
+    min-height: 44px;
+    max-height: 120px;
+    overflow-y: auto;
+    transition: border-color 0.15s;
+  }
+  textarea#user-input:focus { outline: none; border-color: var(--teal); }
+  textarea#user-input::placeholder { color: #AABBBB; }
+
+  .send-btn {
+    width: 44px; height: 44px;
+    background: var(--navy);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .send-btn:hover { background: var(--navy-light); }
+  .send-btn:active { transform: scale(0.95); }
+  .send-btn svg { width: 18px; height: 18px; fill: none; stroke: white; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .input-hint {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .input-hint kbd {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    background: var(--paper-dark);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 5px;
+    color: var(--muted);
+  }
+
+  /* END SCREEN */
+  .end-screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    padding: 2rem;
+    text-align: center;
+    gap: 1rem;
+  }
+  .end-screen.show { display: flex; }
+  .end-icon {
+    width: 64px; height: 64px;
+    background: var(--teal-light);
+    border: 2px solid var(--teal-mid);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.75rem;
+  }
+  .end-screen h2 {
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: var(--navy);
+  }
+  .end-screen p {
+    font-size: 14px;
+    color: var(--muted);
+    max-width: 420px;
+    line-height: 1.7;
+  }
+  .end-checklist {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    text-align: left;
+    width: 100%;
+    max-width: 480px;
+  }
+  .end-checklist h3 {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--navy);
+    margin-bottom: 0.75rem;
+  }
+  .end-checklist ul {
+    list-style: none;
+    font-size: 13px;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .end-checklist ul li { display: flex; align-items: flex-start; gap: 8px; line-height: 1.5; }
+  .end-checklist ul li .ck { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
+  .end-checklist ul li.covered .ck { color: var(--teal); }
+  .end-checklist ul li.missed .ck { color: #E24B4A; }
+  .btn-restart {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    background: var(--navy);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 24px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-restart:hover { background: var(--navy-light); }
+
+  @media(max-width: 640px) {
+    .sidebar { display: none; }
+    .scene-banner { font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <span class="topbar-badge">APRN Lab</span>
+    <span class="topbar-title">MSK History Station — Pediatric Arm Pain</span>
+  </div>
+  <div class="topbar-right">
+    <button class="btn-end" onclick="endSession()">End encounter →</button>
+  </div>
+</div>
+
+<div class="scene-banner">
+  <div class="scene-icon">🏥</div>
+  <div class="scene-text">
+    <strong>Setting:</strong> Urgent care. A mother has just walked in with her 3-year-old daughter, Lily. The mother looks worried. Lily is sitting in her mother's lap, crying softly, and holding her right arm close to her body. <strong>Your role:</strong> Conduct the history. Ask questions of the mother and/or Lily to gather the HPI and focused ROS. When you are ready to end the encounter, click "End encounter."
+  </div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot mom"></div> Mother's response</div>
+  <div class="legend-item"><div class="legend-dot child"></div> Lily's response</div>
+  <div class="legend-item"><div class="legend-dot system"></div> Encounter note</div>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Patient info</div>
+      <div class="sidebar-card">
+        <div class="row"><span class="label">Name</span><span class="val">Lily M.</span></div>
+        <div class="row"><span class="label">Age</span><span class="val">3 years</span></div>
+        <div class="row"><span class="label">Sex</span><span class="val">Female</span></div>
+        <div class="row"><span class="label">Setting</span><span class="val">Urgent care</span></div>
+        <div class="row"><span class="label">Triage</span><span class="val">Non-emergent</span></div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">HPI elements to elicit</div>
+      <ul class="checklist" id="hpi-checklist">
+        <li id="ck-onset"><div class="check">✓</div>Onset &amp; timing</li>
+        <li id="ck-mechanism"><div class="check">✓</div>Mechanism / what happened</li>
+        <li id="ck-location"><div class="check">✓</div>Location of pain</li>
+        <li id="ck-severity"><div class="check">✓</div>Severity / child's behavior</li>
+        <li id="ck-associated"><div class="check">✓</div>Associated symptoms</li>
+        <li id="ck-pertinent"><div class="check">✓</div>Pertinent negatives</li>
+        <li id="ck-prior"><div class="check">✓</div>Prior episodes / PMH</li>
+      </ul>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Tips</div>
+      <div class="tip-box">
+        <p>Direct questions to <strong>the mother</strong> or <strong>Lily</strong> by name — the AI will respond as whichever one you address.</p>
+        <p>Be specific. Vague questions get vague answers, just like in clinic.</p>
+        <p>Lily is 3 — keep child-directed questions very simple.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="chat-area">
+    <div class="messages" id="messages">
+      <div class="msg system">
+        <div class="msg-bubble">Encounter started. The mother and Lily are in the room.</div>
+      </div>
+      <div class="msg patient mom">
+        <div class="msg-label">Mother</div>
+        <div class="msg-bubble">Hi — thank you for seeing us so quickly. She just won't stop crying and she won't move her arm. I don't know what happened, I'm really worried.</div>
+      </div>
+    </div>
+
+    <div class="typing-indicator" id="typing">
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+    </div>
+
+    <div class="end-screen" id="end-screen">
+      <div class="end-icon">📋</div>
+      <h2>Encounter complete</h2>
+      <p>Your history-taking session has ended. Review which HPI elements you covered, then use this information to write your HPI and focused ROS in your documentation assignment.</p>
+      <div class="end-checklist" id="end-checklist">
+        <h3>HPI elements covered</h3>
+        <ul id="coverage-list"></ul>
+      </div>
+      <p style="font-size:12px;">Submit your written HPI and ROS to Canvas per your instructor's directions.</p>
+      <button class="btn-restart" onclick="restartSession()">Start over ↺</button>
+    </div>
+  </div>
+</div>
+
+<div class="input-area" id="input-area">
+  <div class="input-row">
+    <div class="input-wrap">
+      <textarea id="user-input" placeholder="Type your question for the mother or Lily…" rows="1"></textarea>
+    </div>
+    <button class="send-btn" id="send-btn" onclick="sendMessage()">
+      <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </button>
+  </div>
+  <div class="input-hint">
+    <span>Address your question to "the mother" or "Lily" to get a response from each.</span>
+    <span><kbd>Enter</kbd> to send · <kbd>Shift+Enter</kbd> for new line</span>
+  </div>
+</div>
+
+<script>
+const SYSTEM_PROMPT = `You are roleplaying as two characters in a pediatric urgent care encounter for an APRN student's clinical history-taking exercise. The student is practicing eliciting a History of Present Illness (HPI) and focused Review of Systems (ROS).
+
+THE CASE — facts you know and may only reveal when asked:
+- Patient: Lily M., 3-year-old girl
+- Chief complaint: right arm pain, refusing to use right arm
+- What happened: About 90 minutes ago, Lily was at a playground. She was about to run into the street. The mother grabbed Lily's right hand and pulled her back suddenly to stop her. Lily immediately started crying and has not used the arm since.
+- Arm position: Lily holds her right arm slightly bent at the elbow with the forearm turned palm-down (pronated), resting in her lap. She does not move it on her own.
+- Swelling: None that the mother noticed
+- Bruising or discoloration: None
+- Deformity: None visible
+- Finger movement: Lily wiggles her fingers when the mother asks her to, but reluctantly
+- Pain location: Lily points to her elbow area when asked where it hurts (she says "here" and points vaguely to the right elbow)
+- Severity: Lily is crying when touched or when someone tries to move the arm; calmer when left alone and not touching the arm
+- Fever: No fever
+- Vomiting: No vomiting
+- Other injuries: No other injuries noted; no hitting head, no other falls
+- Prior episodes: This exact thing happened once before, about 6 months ago, at the grocery store when the mother pulled Lily up by the arm to put her in the cart. It resolved on its own after a few hours. Mother did not seek care that time.
+- Medical history: Lily is healthy, no chronic conditions, born full-term, normal development, up to date on vaccines
+- Medications: None
+- Allergies: No known drug allergies
+- How she has been since: Lily has been crying on and off since it happened. She stopped crying briefly in the car but started again when they arrived. She has not used the arm at all since the incident.
+- Appetite/behavior before incident: Normal — she was playing happily at the park before this happened
+
+CHARACTERS:
+1. THE MOTHER: Worried but cooperative. Answers questions clearly and in plain language. Speaks naturally as a concerned parent — not in medical terms. She only knows what she observed. She does NOT volunteer information unless asked directly.
+2. LILY (age 3): Responds only to very simple, direct questions. Speaks in short phrases ("it hurts," "here," "owie," "no," "mommy"). Does not understand complex questions. Often looks to her mother. Will not engage with multiple questions at once. Sometimes just shakes her head or points.
+
+RULES — follow these strictly:
+- ONLY reveal information from the case facts above. Do not add, invent, or embellish any details.
+- Do NOT volunteer information that wasn't asked for. If the student asks a vague question, give a realistic but limited answer that reflects what a real parent would say without prompting.
+- Respond as whichever character the student addresses. If they address "the mother" or use her role, respond as the mother. If they address "Lily" or the child directly, respond as Lily.
+- If it's unclear who is being addressed, default to the mother.
+- Keep responses SHORT and natural — 1 to 4 sentences maximum. This is a real conversation, not a report.
+- Do NOT break character or explain the exercise.
+- Do NOT offer to summarize what has been discussed.
+- Do NOT prompt the student on what to ask next.
+- If the student asks something not covered in the case facts, the mother should say she doesn't know or hasn't noticed, as a real parent would.
+- Use the mother's voice consistently: warm, a little anxious, plain-spoken.
+- If the student asks Lily a question that is too complex for a 3-year-old to understand, Lily should look confused or just look at her mom.
+- Never reveal the diagnosis or use medical terminology in your response.`;
+
+let conversationHistory = [];
+let coveredElements = {
+  'ck-onset': false,
+  'ck-mechanism': false,
+  'ck-location': false,
+  'ck-severity': false,
+  'ck-associated': false,
+  'ck-pertinent': false,
+  'ck-prior': false
+};
+
+const coverageKeywords = {
+  'ck-onset': ['when','how long','ago','happen','start','begin','since','today','this morning','tonight','earlier'],
+  'ck-mechanism': ['what happened','how did','what were','doing','pull','grabbed','mechanism','fall','trip','playground','street','hand','wrist','pulled'],
+  'ck-location': ['where','which arm','elbow','wrist','shoulder','hurt','pain','pointing','show','owie'],
+  'ck-severity': ['crying','how bad','scale','worse','better','calm','scream','upset','fussing','behavior','using','move','still'],
+  'ck-associated': ['swelling','swollen','bruising','bruise','discolor','color','deform','shape','finger','feel','numb','tingling','fever','vomit','sick','temperature','hot'],
+  'ck-pertinent': ['fever','vomiting','other','else','head','fall','sick','temperature','appetite','eating','sleeping'],
+  'ck-prior': ['before','history','ever','again','previous','last time','happen before','other injuries','medical','health','condition','medication','allergy']
+};
+
+function checkCoverage(text) {
+  const lower = text.toLowerCase();
+  Object.keys(coverageKeywords).forEach(key => {
+    if (!coveredElements[key]) {
+      if (coverageKeywords[key].some(kw => lower.includes(kw))) {
+        coveredElements[key] = true;
+        const li = document.getElementById(key);
+        if (li) li.classList.add('done');
+      }
+    }
+  });
+}
+
+function appendMessage(role, text, subtype) {
+  const messages = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'msg ' + role + (subtype ? ' ' + subtype : '');
+
+  if (role !== 'user' && role !== 'system') {
+    const label = document.createElement('div');
+    label.className = 'msg-label';
+    label.textContent = subtype === 'child' ? 'Lily' : 'Mother';
+    div.appendChild(label);
+  }
+
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble';
+  bubble.textContent = text;
+  div.appendChild(bubble);
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function detectSpeaker(responseText) {
+  const lower = responseText.toLowerCase();
+  const childPhrases = ['owie','it hurts','here','no','mommy','boo-boo','my arm','shakes her head','looks at','points to','lily shrugs','lily looks'];
+  if (childPhrases.some(p => lower.includes(p)) && lower.length < 120) {
+    return 'child';
+  }
+  return 'mom';
+}
+
+async function sendMessage() {
+  const input = document.getElementById('user-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+  document.getElementById('send-btn').disabled = true;
+
+  appendMessage('user', text);
+  checkCoverage(text);
+
+  conversationHistory.push({ role: 'user', content: text });
+
+  const typing = document.getElementById('typing');
+  typing.classList.add('show');
+  document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': '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', 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-5',
+        max_tokens: 1000,
+        system: SYSTEM_PROMPT,
+        messages: conversationHistory
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      typing.classList.remove('show');
+      const errMsg = data.error ? data.error.message : JSON.stringify(data);
+      appendMessage('system', 'API error (' + response.status + '): ' + errMsg);
+      document.getElementById('send-btn').disabled = false;
+      input.focus();
+      return;
+    }
+
+    const reply = (data.content && data.content[0] && data.content[0].text)
+      ? data.content[0].text
+      : "No response received.";
+
+    conversationHistory.push({ role: 'assistant', content: reply });
+
+    typing.classList.remove('show');
+    const speaker = detectSpeaker(reply);
+    appendMessage('patient', reply, speaker);
+
+  } catch (err) {
+    typing.classList.remove('show');
+    appendMessage('system', 'Error: ' + err.message);
+  }
+
+  document.getElementById('send-btn').disabled = false;
+  input.focus();
+}
+
+function endSession() {
+  document.getElementById('input-area').style.display = 'none';
+  document.getElementById('messages').style.display = 'none';
+  document.getElementById('typing').style.display = 'none';
+
+  const coverageLabels = {
+    'ck-onset': 'Onset and timing of symptoms',
+    'ck-mechanism': 'Mechanism — what happened to cause the injury',
+    'ck-location': 'Location of pain',
+    'ck-severity': 'Severity and effect on child\'s behavior',
+    'ck-associated': 'Associated symptoms (swelling, bruising, finger movement)',
+    'ck-pertinent': 'Pertinent negatives (fever, vomiting, other injury)',
+    'ck-prior': 'Prior episodes and relevant past medical history'
+  };
+
+  const list = document.getElementById('coverage-list');
+  list.innerHTML = '';
+  Object.keys(coveredElements).forEach(key => {
+    const li = document.createElement('li');
+    li.className = coveredElements[key] ? 'covered' : 'missed';
+    li.innerHTML = `<span class="ck">${coveredElements[key] ? '✓' : '✗'}</span>${coverageLabels[key]}`;
+    list.appendChild(li);
+  });
+
+  document.getElementById('end-screen').classList.add('show');
+}
+
+function restartSession() {
+  conversationHistory = [];
+  Object.keys(coveredElements).forEach(k => {
+    coveredElements[k] = false;
+    const li = document.getElementById(k);
+    if (li) li.classList.remove('done');
+  });
+
+  const messages = document.getElementById('messages');
+  messages.innerHTML = `
+    <div class="msg system"><div class="msg-bubble">Encounter started. The mother and Lily are in the room.</div></div>
+    <div class="msg patient mom">
+      <div class="msg-label">Mother</div>
+      <div class="msg-bubble">Hi — thank you for seeing us so quickly. She just won't stop crying and she won't move her arm. I don't know what happened, I'm really worried.</div>
+    </div>`;
+  messages.style.display = 'flex';
+
+  document.getElementById('typing').style.display = '';
+  document.getElementById('input-area').style.display = '';
+  document.getElementById('end-screen').classList.remove('show');
+  document.getElementById('user-input').focus();
+}
+
+// Auto-resize textarea
+const textarea = document.getElementById('user-input');
+textarea.addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+});
+
+// Enter to send
+textarea.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+</script>
+</body>
+</html>
